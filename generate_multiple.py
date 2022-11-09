@@ -19,9 +19,8 @@ from utilities.device import get_device, use_cuda
 
 from structureness_indicators import evaluate_structureness
 
-NSAMPLES = 10
+NSAMPLES = 1
 INDICES = []
-
 
 # main
 def main():
@@ -44,7 +43,8 @@ def main():
     os.makedirs(args.output_dir, exist_ok=True)
 
     # Grabbing dataset if needed
-    _, _, dataset = create_epiano_datasets(args.midi_root, args.num_prime, random_seq=False, pmp=args.pmp)
+    # _, _, dataset = create_epiano_datasets(args.midi_root, args.num_prime, random_seq=False, pmp=args.pmp)
+    _, _, dataset = create_epiano_datasets(args.midi_root, args.num_prime, random_seq=False)
     
     if(args.primer_file is None):
         f = str(random.randrange(len(dataset)))
@@ -52,7 +52,8 @@ def main():
         f = args.primer_file
     
     idx = int(f)
-    primer, _, _  = dataset[idx]
+    # primer, _, _  = dataset[idx]
+    primer, _ = dataset[idx]
     primer = primer.int().to(get_device())
 
     print("Using primer index:", idx, "(", dataset.data_files[idx], ")")
@@ -60,16 +61,21 @@ def main():
     
     dir_split = dataset.data_files[idx].rfind("/") + 1
     filepath, filename = dataset.data_files[idx][:dir_split], dataset.data_files[idx][dir_split:-7]
+
     pmp = torch.FloatTensor(pickle.load(open(f"{filepath}Pmp-{filename}-1.pickle", "rb"))).to(get_device()) if args.pmp else None
     if pmp is not None and pmp.shape[0] < args.target_seq_length:
         pmp = torch.cat((pmp, torch.zeros(args.target_seq_length - pmp.shape[0]).to(get_device())))
 
 
-    model = MusicTransformer(n_layers=args.n_layers, num_heads=args.num_heads,
-                d_model=args.d_model, dim_feedforward=args.dim_feedforward,
-                max_sequence=args.max_sequence, rpr=args.rpr, pmp=args.pmp).to(get_device())
+    # model = MusicTransformer(n_layers=args.n_layers, num_heads=args.num_heads,
+    #             d_model=args.d_model, dim_feedforward=args.dim_feedforward,
+    #             max_sequence=args.max_sequence, rpr=args.rpr, pmp=args.pmp).to(get_device())
 
-    model.load_state_dict(torch.load(args.model_weights))
+    model = MusicTransformer(n_layers=args.n_layers, num_heads=args.num_heads,
+                             d_model=args.d_model, dim_feedforward=args.dim_feedforward,
+                             max_sequence=args.max_sequence, rpr=args.rpr).to(get_device())
+
+    model.load_state_dict(torch.load(args.model_weights, map_location=torch.device('cpu')))
     
     f_path = os.path.join(args.output_dir, "primer.mid")
     decode_midi(primer[:args.num_prime].tolist(), f_path)
@@ -87,7 +93,8 @@ def main():
                 decode_midi(beam_seq[0].tolist(), f_path)
             else:
                 print("RAND DIST")
-                rand_seq = model.generate(primer[:args.num_prime], args.target_seq_length, beam=0, pmp=pmp if args.pmp else None)
+                # rand_seq = model.generate(primer[:args.num_prime], args.target_seq_length, beam=0, pmp=pmp if args.pmp else None)
+                rand_seq = model.generate(primer[:args.num_prime], args.target_seq_length, beam=0)
 
                 f_path = os.path.join(args.output_dir, f"rand-{i}.mid")
                 decode_midi(rand_seq[0].tolist(), f_path)
