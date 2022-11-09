@@ -154,6 +154,7 @@ def parse_generate_args():
     parser.add_argument("-midi_root", type=str, default="./dataset/e_piano/", help="Midi file to prime the generator with")
     parser.add_argument("-output_dir", type=str, default="./gen", help="Folder to write generated midi to")
     parser.add_argument("-primer_file", type=str, default=None, help="File path or integer index to the evaluation dataset. Default is to select a random index.")
+    parser.add_argument("-num_primer_files", type=int, default=1, help="Number of files to prime the generator with. Indexes are chosen at random. Default is 1.")
     parser.add_argument("--force_cpu", action="store_true", help="Forces model to run on a cpu even when gpu is available")
 
     parser.add_argument("-target_seq_length", type=int, default=1024, help="Target length you'd like the midi to be")
@@ -168,6 +169,9 @@ def parse_generate_args():
     parser.add_argument("-d_model", type=int, default=512, help="Dimension of the model (output dim of embedding layers, etc.)")
 
     parser.add_argument("-dim_feedforward", type=int, default=1024, help="Dimension of the feedforward layer")
+
+    parser.add_argument("-num_samples", type=int, default=1, help="Number of samples to be generated from each midi file selected from the dataset")
+    parser.add_argument("--struct", action="store_true", default=False, help="Calculate structureness indicators of the generated samples")
 
     return parser.parse_args()
 
@@ -189,6 +193,7 @@ def print_generate_args(args):
     print("")
     print("target_seq_length:", args.target_seq_length)
     print("num_prime:", args.num_prime)
+    print("num_primer_files:", args.num_primer_files)
     print("model_weights:", args.model_weights)
     print("beam:", args.beam)
     print("")
@@ -199,6 +204,9 @@ def print_generate_args(args):
     print("d_model:", args.d_model)
     print("")
     print("dim_feedforward:", args.dim_feedforward)
+    print("")
+    print("num_samples:", args.num_samples)
+    print("struct:", args.struct)
     print(SEPERATOR)
     print("")
 
