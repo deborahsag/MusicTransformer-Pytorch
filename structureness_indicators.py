@@ -70,14 +70,11 @@ def SIs_from_mid(mid):
     long  = compute_structure_indicator(fit_path, 15)
     return (short, mid, long)
 
-if __name__ == "__main__":
-    parser = ArgumentParser(description="Runs all evaluation metrics on the pieces within the provided directory, and writes the results to a report.")
-    parser.add_argument("-d", "--dir", required=True, type=str, help="Directory containing fitness scape plots")
-    args = parser.parse_args()
-    
-    midis = glob(f"{args.dir}/**/rand-*.[mid|MID]*", recursive=True)
-    
-    results = process_map(SIs_from_mid, midis, max_workers=10, chunksize=1)
+
+def evaluate_structureness(directory, max_workers=10, chunksize=1):
+    midis = glob(f"{directory}/**/rand-*.[mid|MID]*", recursive=True)
+
+    results = process_map(SIs_from_mid, midis, max_workers=max_workers, chunksize=chunksize)
 
     print(f"Mean short SI: {mean([r[0] for r in results])}")
     print(f"Mean mid   SI: {mean([r[1] for r in results])}")

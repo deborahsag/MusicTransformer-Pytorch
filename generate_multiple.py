@@ -17,6 +17,8 @@ from torch.optim import Adam
 from utilities.constants import *
 from utilities.device import get_device, use_cuda
 
+from structureness_indicators import evaluate_structureness
+
 NSAMPLES = 10
 INDICES = []
 
@@ -92,6 +94,12 @@ def main():
                 
         print()
 
+    if (args.struct):
+        print("Structureness indicators:")
+        directory = args.output_dir
+        evaluate_structureness(directory)
+
+    print()
 
 if __name__ == "__main__":
     main()
