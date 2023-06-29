@@ -1,5 +1,5 @@
 from glob import glob
-import argparse
+from argparse import ArgumentParser
 import numpy as np
 from statistics import mean
 from os.path import exists
@@ -15,7 +15,6 @@ shift_set = np.array([x for x in range(12)])     # for tranposition invariance
 rel_threshold = 0.25                             # the proportion of (highest) values to retain
 penalty = -2                                     # all values below ``rel_threshold`` are set to this
 shorts, mids, longs = [], [], []
-
 
 def compute_piece_ssm_scplot(wav_path):
     # compute & save self-similarity matrix (default resulting sample rate: 2Hz)
@@ -71,25 +70,15 @@ def SIs_from_mid(mid):
     long  = compute_structure_indicator(fit_path, 15)
     return (short, mid, long)
 
-
-def structureness_indicators(plots_dir, max_workers=10, chunksize=1):
-    midis = glob(f"{plots_dir}/**/rand-*.[mid|MID]*", recursive=True)
+if __name__ == "__main__":
+    parser = ArgumentParser(description="Runs all evaluation metrics on the pieces within the provided directory, and writes the results to a report.")
+    parser.add_argument("-d", "--dir", required=True, type=str, help="Directory containing fitness scape plots")
+    args = parser.parse_args()
     
-    results = process_map(SIs_from_mid, midis, max_workers=max_workers, chunksize=chunksize)
+    midis = glob(f"{args.dir}/**/rand-*.[mid|MID]*", recursive=True)
+    
+    results = process_map(SIs_from_mid, midis, max_workers=10, chunksize=1)
 
     print(f"Mean short SI: {mean([r[0] for r in results])}")
     print(f"Mean mid   SI: {mean([r[1] for r in results])}")
     print(f"Mean long  SI: {mean([r[2] for r in results])}")
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-midi_root", type=str, help="Folder of midi files to be evaluated.")
-    args = parser.parse_args()
-
-    structureness_indicators(args.midi_root)
-    return
-
-
-if __name__ == "__main__":
-    main()

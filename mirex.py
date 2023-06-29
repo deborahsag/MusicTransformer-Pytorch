@@ -35,7 +35,7 @@ def main():
     SEED = args.seed if args.seed is not None else random.randrange(sys.maxsize)
     print(f"Setting seed to {SEED}")
     random.seed(SEED)
-
+    
     # Load model
     model = MusicTransformer(new_notation=args.new_notation, n_layers=args.n_layers, num_heads=args.num_heads,
                              d_model=args.d_model, dim_feedforward=args.dim_feedforward,
