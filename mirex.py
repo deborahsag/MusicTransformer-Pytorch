@@ -15,8 +15,9 @@ def get_prompt(pieces, prompt_len):
     return pieces[0][:prompt_len]
 
 
-def get_continuations(pieces, prompt_len):
-    return [piece[prompt_len:] for piece in pieces]
+def get_continuations(pieces, prompt_len, continuation_len):
+    final_idx = prompt_len + continuation_len
+    return [piece[prompt_len:final_idx] for piece in pieces]
 
 
 def compute_continuation_prob(gen_probs, continuation):
@@ -36,7 +37,7 @@ def main():
     print(f"Setting seed to {SEED}")
     print()
     random.seed(SEED)
-    
+
     # Load model
     model = MusicTransformer(n_layers=args.n_layers, num_heads=args.num_heads,
                              d_model=args.d_model, dim_feedforward=args.dim_feedforward,
@@ -60,7 +61,7 @@ def main():
 
         # Get prompts and continuations (tensor type)
         prompt = get_prompt(pieces, args.prompt_length)
-        continuations = get_continuations(pieces, args.prompt_length)
+        continuations = get_continuations(pieces, args.prompt_length, args.continuation_length)
 
         # Generate token probabilities from prompt
         _, gen_probs = model.generate(prompt, target_seq_length, beam=args.beam)
