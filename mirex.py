@@ -34,10 +34,11 @@ def main():
     # Set seed for the random prompt and continuations selector
     SEED = args.seed if args.seed is not None else random.randrange(sys.maxsize)
     print(f"Setting seed to {SEED}")
+    print()
     random.seed(SEED)
     
     # Load model
-    model = MusicTransformer(new_notation=args.new_notation, n_layers=args.n_layers, num_heads=args.num_heads,
+    model = MusicTransformer(n_layers=args.n_layers, num_heads=args.num_heads,
                              d_model=args.d_model, dim_feedforward=args.dim_feedforward,
                              max_sequence=args.max_sequence, rpr=args.rpr).to(get_device())
 
@@ -47,7 +48,7 @@ def main():
 
     # Grab test dataset
     target_seq_length = args.prompt_length + args.continuation_length
-    _, _, dataset = create_epiano_datasets(args.midi_root, target_seq_length, args.new_notation, random_seq=True)
+    _, _, dataset = create_epiano_datasets(args.midi_root, target_seq_length, random_seq=True)
 
     score = []
     for i in range(args.num_tests):
