@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch.nn.modules.normalization import LayerNorm
 import random
+import numpy as np
 
 from utilities.constants import *
 from utilities.device import get_device
@@ -131,6 +132,7 @@ class MusicTransformer(nn.Module):
         num_primer = len(primer)
         gen_seq[..., :num_primer] = primer.type(TORCH_LABEL_TYPE).to(get_device())
 
+        total_probs = np.zeros(TOKEN_END)
 
         # print("primer:",primer)
         # print(gen_seq)
@@ -139,6 +141,7 @@ class MusicTransformer(nn.Module):
             # gen_seq_batch     = gen_seq.clone()
             y = self.softmax(self.forward(gen_seq[..., :cur_i]))[..., :TOKEN_END]
             token_probs = y[:, cur_i-1, :]
+            total_probs = np.vstack((total_probs, token_probs[0].cpu().detach()))
 
             if(beam == 0):
                 beam_ran = 2.0
@@ -171,7 +174,7 @@ class MusicTransformer(nn.Module):
             if(cur_i % 50 == 0):
                 print(cur_i, "/", target_seq_length)
 
-        return gen_seq[:, :cur_i]
+        return gen_seq[:, :cur_i], total_probs
 
 # Used as a dummy to nn.Transformer
 # DummyDecoder
