@@ -128,9 +128,9 @@ def print_mirex_args(args):
     print("MIREX")
     print(SEPARATOR)
     print(f"midi_root: {args.midi_root}")
-    print(f"prompt_length: {args.prompt_lenght}")
+    print(f"prompt_length: {args.prompt_length}")
     print(f"continuation_length: {args.continuation_length}")
-    print(f"num_continuations: {args.num_continutions}")
+    print(f"num_continuations: {args.num_continuations}")
     print(f"num_tests: {args.num_tests}")
     print(f"seed: {args.seed}")
 
