@@ -15,9 +15,8 @@ def get_prompt(pieces, prompt_len):
     return pieces[0][:prompt_len]
 
 
-def get_continuations(pieces, prompt_len, continuation_len):
-    final_idx = prompt_len + continuation_len
-    return [piece[prompt_len:final_idx] for piece in pieces]
+def get_continuations(pieces, prompt_len):
+    return [piece[prompt_len:] for piece in pieces]
 
 
 def compute_continuation_prob(gen_probs, continuation):
@@ -48,8 +47,8 @@ def main():
     model.training = False
 
     # Grab test dataset
-    target_seq_length = args.prompt_length + args.continuation_length
-    _, _, dataset = create_epiano_datasets(args.midi_root, target_seq_length, random_seq=True)
+    seq_length = args.prompt_length + args.continuation_length
+    _, _, dataset = create_epiano_datasets(args.midi_root, seq_length, random_seq=True)
 
     score = []
     for i in range(args.num_tests):
@@ -61,10 +60,10 @@ def main():
 
         # Get prompts and continuations (tensor type)
         prompt = get_prompt(pieces, args.prompt_length)
-        continuations = get_continuations(pieces, args.prompt_length, args.continuation_length)
+        continuations = get_continuations(pieces, args.prompt_length)
 
         # Generate token probabilities from prompt
-        _, gen_probs = model.generate(prompt, target_seq_length, beam=args.beam)
+        _, gen_probs = model.generate(prompt, seq_length, beam=args.beam)
 
         # For each continuation, compute the probability of it being chosen
         probs = []
