@@ -8,5 +8,7 @@
 
 test_**
 
+generated/
+
 venv_MT/
 .idea/
