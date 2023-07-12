@@ -23,7 +23,8 @@ def compute_continuation_prob(gen_probs, continuation):
     # Get average probability of token sequences
     probs = []
     for i in range(len(continuation)):
-        probs.append(gen_probs[i + 1][continuation[i] - 1])
+        if continuation[i] < TOKEN_END:
+            probs.append(gen_probs[i + 1][continuation[i]])
     return np.mean(np.array(probs))
 
 
@@ -33,8 +34,7 @@ def main():
 
     # Set seed for the random prompt and continuations selector
     SEED = args.seed if args.seed is not None else random.randrange(sys.maxsize)
-    print(f"Setting seed to {SEED}")
-    print()
+    print(f"Setting seed to {SEED}\n")
     random.seed(SEED)
 
     # Load model
