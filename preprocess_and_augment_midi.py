@@ -1,5 +1,6 @@
-import os
+import argparse
 import json
+import os
 import pickle
 from copy import deepcopy
 
@@ -14,6 +15,14 @@ JSON_FILE = "maestro-v2.0.0.json"
 
 
 def augment_midi(midi, pitch, tempo):
+    """
+    ----------
+    Authors:  Gabriel Souza, Deborah Guimarães
+    ----------
+    Data augmentation using the pretty_midi module.
+    ----------
+    """
+
     print(f"Doing for {midi}")
     dir_split, extension_split = midi.rfind("/") + 1, midi.rfind(".midi") if ".midi" in midi else midi.rfind(".MIDI")
     filepath, filename, extension = midi[:dir_split], midi[dir_split:extension_split], midi[extension_split:]
@@ -40,10 +49,10 @@ def augment_midi(midi, pitch, tempo):
 
 
 
-def prep_maestro_midi(maestro_root, output_dir):
+def prep_maestro_midi_aug(maestro_root, output_dir):
     """
     ----------
-    Author: Damon Gwinn, alteration: Gabriel Souza
+    Author: Damon Gwinn, alterations: Gabriel Souza, Deborah Guimarães
     ----------
     Pre-processes the maestro dataset, putting processed midi data (train, eval, test) into the
     given output folder, while making the data augmentation for the train data
@@ -123,8 +132,41 @@ def prep_maestro_midi(maestro_root, output_dir):
     return True
 
 
+def parse_args():
+    """
+    ----------
+    Author: Damon Gwinn
+    ----------
+    Parses arguments for preprocess_midi using argparse
+    ----------
+    """
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("root", type=str, help="Root folder for the Maestro dataset or for custom data.")
+    parser.add_argument("-output_dir", type=str, default="./dataset/e_piano", help="Output folder to put the preprocessed midi into.")
+    # parser.add_argument("--custom_dataset", action="store_true", help="Whether or not the specified root folder contains custom data.")
+
+    return parser.parse_args()
+
+
 def main():
-    pass
+    """
+    ----------
+    Author: Damon Gwinn
+    ----------
+    Entry point. Preprocesses maestro and saved midi to specified output folder.
+    ----------
+    """
+
+    args            = parse_args()
+    root            = args.root
+    output_dir      = args.output_dir
+
+    print("Preprocessing midi files and saving to", output_dir)
+    prep_maestro_midi_aug(root, output_dir)
+    print("Done!")
+    print("")
 
 
 if __name__ == "__main__":
