@@ -1,15 +1,3 @@
-"""
-Observacoes
-
-Pode tambem verificar no preprocess se a musica ja foi copiada pra evitar copiar de novo
-
-test.json
-train: 8
-test: 4
-validation: 7
-
-"""
-
 import argparse
 import json
 import os
@@ -127,12 +115,6 @@ def prep_maestro_midi_aug(maestro_root, output_dir):
                     dir_split, extension_split = midi_path.rfind("/") + 1, midi_path.rfind(".midi") if ".midi" in midi_path else midi_path.rfind(".MIDI")
                     filepath, filename, extension = midi_path[:dir_split], midi_path[dir_split:extension_split], midi_path[extension_split:]
                     midi_aug_path = f"{filepath}Aug-{filename}-{pitch}-{tempo}{extension}"
-
-                    # if (pitch == 0 and tempo == 1) and not os.path.exists(midi_aug_path):
-                    #     augment_midi(midi_path, pitch, tempo)
-                    #
-                    # if pitch == 0 and tempo == 1:
-                    #     continue
 
                     if pitch == 0 and tempo == 1:
                         continue
