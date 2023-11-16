@@ -8,27 +8,9 @@ import pretty_midi
 from utilities.metrics_argument_funcs import parse_pitch_class_consistency_args, print_pitch_class_consistency_args
 
 
-def get_midi_partitions(midi, num_partitions):
-    """
-    Partitions a PrettyMIDI object given the number of partitions. Separation is based in seconds.
-    Returns a list of PrettyMIDI objects.
-    """
-    midi_partitions = []
-    for i in range(num_partitions):
-        midi_partitions.append(pretty_midi.PrettyMIDI())
-
-    for instrument in midi.instruments:
-        instrument_partitions = get_instrument_partitions(instrument, num_partitions)
-
-        for i in range(num_partitions):
-            midi_partitions[i].instruments.append(instrument_partitions[i])
-
-    return midi_partitions
-
-
 def get_instrument_partitions(instrument, num_partitions):
     """
-    Partitions a PrettyMIDI object given the number of partitions. Separation is based in seconds.
+    Partitions a (PrettyMIDI) Instrument object given the number of partitions. Separation is based in seconds.
     Returns a list of Instrument objects.
     """
     end_time = instrument.get_end_time()
@@ -54,6 +36,24 @@ def get_instrument_partitions(instrument, num_partitions):
         instrument_partitions.append(part)
 
     return instrument_partitions
+
+
+def get_midi_partitions(midi, num_partitions):
+    """
+    Partitions a PrettyMIDI object given the number of partitions. Separation is based in seconds.
+    Returns a list of PrettyMIDI objects.
+    """
+    midi_partitions = []
+    for i in range(num_partitions):
+        midi_partitions.append(pretty_midi.PrettyMIDI())
+
+    for instrument in midi.instruments:
+        instrument_partitions = get_instrument_partitions(instrument, num_partitions)
+
+        for i in range(num_partitions):
+            midi_partitions[i].instruments.append(instrument_partitions[i])
+
+    return midi_partitions
 
 
 def get_partitions_histograms(partitions):
