@@ -7,9 +7,7 @@ import pickle
 import sys
 from shutil import copyfile
 
-from third_party.midi_processor.processor import encode_midi_original, encode_midi_modified, decode_midi_modified, \
-    decode_midi_original
-
+from third_party.midi_processor.processor import decode_midi, encode_midi
 from statistics import mean
 from utilities.argument_funcs import parse_generate_args, print_generate_args
 from model.music_transformer import MusicTransformer
@@ -45,12 +43,11 @@ def main():
     SEED = args.seed if args.seed is not None else random.randrange(sys.maxsize)
     print(f"Setting seed to {SEED}")
     random.seed(SEED)
-    print("Generating with seed", SEED)
 
     os.makedirs(args.output_dir, exist_ok=True)
 
     # Grabbing dataset if needed
-    _, _, dataset = create_epiano_datasets(args.midi_root, args.num_prime, args.new_notation, random_seq=False)
+    _, _, dataset = create_epiano_datasets(args.midi_root, args.num_prime, random_seq=False)
 
     if (args.primer_file is not None):
         f = [args.primer_file]
@@ -65,22 +62,16 @@ def main():
         print("Using primer index:", idx, "(", dataset.data_files[idx], ")")
         with open(dataset.data_files[idx], "rb") as p:
             original = pickle.load(p)
-        if args.new_notation:
-            decode_midi_modified(original, f"{args.output_dir}/original-{idx}.mid")
-        else:
-            decode_midi_original(original, f"{args.output_dir}/original-{idx}.mid")
+        decode_midi(original, f"{args.output_dir}/original-{idx}.mid")
 
-        model = MusicTransformer(new_notation=args.new_notation, n_layers=args.n_layers, num_heads=args.num_heads,
+        model = MusicTransformer(n_layers=args.n_layers, num_heads=args.num_heads,
                                  d_model=args.d_model, dim_feedforward=args.dim_feedforward,
                                  max_sequence=args.max_sequence, rpr=args.rpr).to(get_device())
 
         model.load_state_dict(torch.load(args.model_weights))
 
         f_path = os.path.join(args.output_dir, f"primer-{idx}.mid")
-        if args.new_notation:
-            decode_midi_modified(primer[:args.num_prime].tolist(), f_path)
-        else:
-            decode_midi_original(primer[:args.num_prime].tolist(), f_path)
+        decode_midi(primer[:args.num_prime].tolist(), f_path)
 
         for i in range(args.num_samples):
             print(f"Generating song {j / i}")
@@ -92,19 +83,13 @@ def main():
                     beam_seq, _ = model.generate(primer[:args.num_prime], args.target_seq_length, beam=args.beam)
 
                     f_path = os.path.join(args.output_dir, f"beam-{idx}-{i}.mid")
-                    if args.new_notation:
-                        decode_midi_modified(beam_seq[0].tolist(), f_path)
-                    else:
-                        decode_midi_original(beam_seq[0].tolist(), f_path)
+                    decode_midi(beam_seq[0].tolist(), f_path)
                 else:
                     print("RAND DIST")
                     rand_seq, _ = model.generate(primer[:args.num_prime], args.target_seq_length, beam=0)
 
                     f_path = os.path.join(args.output_dir, f"rand-{idx}-{i}.mid")
-                    if args.new_notation:
-                        decode_midi_modified(rand_seq[0].tolist(), f_path)
-                    else:
-                        decode_midi_original(rand_seq[0].tolist(), f_path)
+                    decode_midi(rand_seq[0].tolist(), f_path)
 
             print()
     
