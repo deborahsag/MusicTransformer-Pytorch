@@ -74,7 +74,7 @@ def main():
         decode_midi(primer[:args.num_prime].tolist(), f_path)
 
         for i in range(args.num_samples):
-            print(f"Generating song {j / i}")
+            print(f"Generating song {j} / {i}")
             # GENERATION
             model.eval()
             with torch.set_grad_enabled(False):
