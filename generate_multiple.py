@@ -54,6 +54,7 @@ def main():
     else:
         f = random.sample(range(len(dataset)), args.num_primer_files)
 
+    song = 1
     for j in range(args.num_primer_files):
         idx = int(f[j])
         primer, _ = dataset[idx]
@@ -74,7 +75,7 @@ def main():
         decode_midi(primer[:args.num_prime].tolist(), f_path)
 
         for i in range(args.num_samples):
-            print(f"Generating song {j} / {i}")
+            print(f"Generating song {song}/{args.num_primer_files * args.num_samples}")
             # GENERATION
             model.eval()
             with torch.set_grad_enabled(False):
@@ -91,9 +92,8 @@ def main():
                     f_path = os.path.join(args.output_dir, f"rand-{idx}-{i}.mid")
                     decode_midi(rand_seq[0].tolist(), f_path)
 
+            song += 1
             print()
-    
-    print(f"Files were generated with seed {seed}")
 
 
 if __name__ == "__main__":
