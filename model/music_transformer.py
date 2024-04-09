@@ -4,7 +4,8 @@ from torch.nn.modules.normalization import LayerNorm
 import random
 import numpy as np
 
-from utilities.constants import *
+# from utilities.constants import *
+from utilities.REMIconstants import *
 from utilities.device import get_device
 
 from .positional_encoding import PositionalEncoding
@@ -132,14 +133,14 @@ class MusicTransformer(nn.Module):
         num_primer = len(primer)
         gen_seq[..., :num_primer] = primer.type(TORCH_LABEL_TYPE).to(get_device())
 
-        total_probs = np.zeros(TOKEN_END)
+        total_probs = np.zeros(VOCAB_SIZE-1)
 
         # print("primer:",primer)
         # print(gen_seq)
         cur_i = num_primer
         while(cur_i < target_seq_length):
             # gen_seq_batch     = gen_seq.clone()
-            y = self.softmax(self.forward(gen_seq[..., :cur_i]))[..., :TOKEN_END]
+            y = self.softmax(self.forward(gen_seq[..., :cur_i]))[..., :VOCAB_SIZE-1]
             token_probs = y[:, cur_i-1, :]
             total_probs = np.vstack((total_probs, token_probs[0].cpu().detach()))
 
