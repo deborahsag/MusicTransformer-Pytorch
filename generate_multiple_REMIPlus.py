@@ -43,7 +43,9 @@ tokenizer = REMI(config)
 
 
 def decode_REMIPlus_to_midi(id_list, file_path):
-    tokenizer.tokens_to_midi(tokens=id_list, output_path=file_path)
+    midi = tokenizer.tokens_to_midi(tokens=id_list)
+    midi.dump_midi(file_path)
+
 
 
 # main
