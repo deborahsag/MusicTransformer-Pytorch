@@ -86,7 +86,8 @@ def main():
         print("Using primer index:", idx, "(", dataset.data_files[idx], ")")
         with open(dataset.data_files[idx], "rb") as p:
             original = pickle.load(p)
-        decode_REMIPlus_to_midi(original, f"{args.output_dir}/original-{idx}.mid")
+        f_path = os.path.join(args.output_dir, f"original-{idx}.mid")
+        decode_REMIPlus_to_midi(original, f_path)
         # decode_midi(original, f"{args.output_dir}/original-{idx}.mid")
 
         model = MusicTransformer(n_layers=args.n_layers, num_heads=args.num_heads,
