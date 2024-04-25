@@ -4,6 +4,7 @@ import pickle
 import json
 import random
 
+import third_party.midi_processor.processor as midi_processor
 from miditok import REMI, TSD, TokenizerConfig
 
 JSON_FILE = "maestro-v2.0.0.json"
@@ -25,18 +26,18 @@ TOKENIZER_PARAMS = {
 }
 config = TokenizerConfig(**TOKENIZER_PARAMS)
 
-# Creates the tokenizer
-# tokenizer = REMI(config)
-tokenizer = TSD(config)
 
-
-def encode_midi(midi_file):
+def encode_midi(midi_file, tokenization):
+    if tokenization == "remi":
+        tokenizer = REMI(config)
+    else:
+        tokenizer = TSD(config)
     tok_sequence = tokenizer(midi_file)  # convert to a TokSequence object in REMI+
     return tok_sequence.ids  # return a list of token ids (int)
 
 
 # prep_midi
-def prep_maestro_midi(maestro_root, output_dir):
+def prep_maestro_midi(maestro_root, output_dir, tokenization):
     """
     ----------
     Author: Damon Gwinn
@@ -44,6 +45,7 @@ def prep_maestro_midi(maestro_root, output_dir):
     Pre-processes the maestro dataset, putting processed midi data (train, eval, test) into the
     given output folder
     ----------
+    :param tokenization: Can be "remi" or "tsd" for the tokenization methods REMI+ and TSD
     """
 
     train_dir = os.path.join(output_dir, "train")
@@ -85,7 +87,10 @@ def prep_maestro_midi(maestro_root, output_dir):
             print("ERROR: Unrecognized split type:", split_type)
             return False
 
-        prepped = encode_midi(mid)
+        if tokenization == "midi":
+            prepped = midi_processor.encode_midi(mid)
+        else:
+            prepped = encode_midi(mid, tokenization)
 
         o_stream = open(o_file, "wb")
         pickle.dump(prepped, o_stream)
@@ -101,7 +106,7 @@ def prep_maestro_midi(maestro_root, output_dir):
     return True
 
 
-def prep_custom_midi(custom_midi_root, output_dir, valid_p = 0.1, test_p = 0.2):
+def prep_custom_midi(custom_midi_root, output_dir, tokenization, valid_p=0.1, test_p=0.2):
     """
     ----------
     Author: Corentin Nelias
@@ -109,6 +114,7 @@ def prep_custom_midi(custom_midi_root, output_dir, valid_p = 0.1, test_p = 0.2):
     Pre-processes custom midi files that are not part of the maestro dataset, putting processed midi data (train, eval, test) into the
     given output folder. 
     ----------
+    :param tokenization: Can be "remi" or "tsd" for the tokenization methods REMI+ and TSD
     """
     train_dir = os.path.join(output_dir, "train")
     os.makedirs(train_dir, exist_ok=True)
@@ -149,7 +155,10 @@ def prep_custom_midi(custom_midi_root, output_dir, valid_p = 0.1, test_p = 0.2):
             o_file = os.path.join(test_dir, f_name)
             test_count += 1
 
-        prepped = encode_midi(mid)
+        if tokenization == "midi":
+            prepped = midi_processor.encode_midi(mid)
+        else:
+            prepped = encode_midi(mid, tokenization)
 
         o_stream = open(o_file, "wb")
         pickle.dump(prepped, o_stream)
@@ -178,7 +187,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("root", type=str, help="Root folder for the Maestro dataset or for custom data.")
-    parser.add_argument("-output_dir", type=str, default="./dataset/e_piano", help="Output folder to put the preprocessed midi into.")
+    parser.add_argument("-output_dir", type=str, help="Output folder to put the preprocessed midi into.")
+    parser.add_argument("-tokenization", type=str, help="Type of tokenization to use: midi for MIDI-like, remi for REMI+, tsd for TSD or oct for Octuple")
     parser.add_argument("--custom_dataset", action="store_true", help="Whether or not the specified root folder contains custom data.")
 
     return parser.parse_args()
@@ -195,14 +205,16 @@ def main():
     """
 
     args            = parse_args()
-    root    = args.root
+    root            = args.root
     output_dir      = args.output_dir
+    tokenization    = args.tokenization
 
+    print("Chosen tokenization:", tokenization)
     print("Preprocessing midi files and saving to", output_dir)
     if args.custom_dataset:
-        prep_custom_midi(root, output_dir)
+        prep_custom_midi(root, output_dir, tokenization)
     else:
-        prep_maestro_midi(root, output_dir)
+        prep_maestro_midi(root, output_dir, tokenization)
     print("Done!")
     print("")
 
