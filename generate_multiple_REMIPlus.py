@@ -7,7 +7,6 @@ import pickle
 import sys
 from shutil import copyfile
 
-from third_party.midi_processor.processor import decode_midi, encode_midi
 from statistics import mean
 from utilities.argument_funcs import parse_generate_args, print_generate_args
 from model.music_transformer import MusicTransformer
@@ -18,10 +17,11 @@ from torch.optim import Adam
 from utilities.constants import *
 from utilities.device import get_device, use_cuda
 
-from miditok import REMI, TokenizerConfig, TokSequence
+import third_party.midi_processor.processor as midi_processor
+from miditok import REMI, TSD, TokenizerConfig
 
 
-# REMI+ tokenizer parameters
+# Tokenizer parameters
 TOKENIZER_PARAMS = {
     "pitch_range": (21, 109),
     "beat_res": {(0, 4): 8, (4, 12): 4},
@@ -30,22 +30,25 @@ TOKENIZER_PARAMS = {
     "use_chords": True,
     "use_rests": False,
     "use_tempos": True,
-    "use_time_signatures": True,            # REMI+
-    "use_programs": True,                   # REMI+
-    "one_token_stream_for_programs": True,  # REMI+
+    "use_time_signatures": True,
+    "use_programs": True,
+    "one_token_stream_for_programs": True,
     "num_tempos": 32,  # number of tempo bins
     "tempo_range": (40, 250),  # (min, max)
 }
 config = TokenizerConfig(**TOKENIZER_PARAMS)
 
-# Creates the tokenizer
-tokenizer = REMI(config)
+# TOKENIZATION = "midi"
+TOKENIZATION = "remi"
+# TOKENIZATION = "tsd"
 
 
-def decode_REMIPlus_to_midi(id_list, file_path):
-    midi = tokenizer.tokens_to_midi(tokens=id_list)
-    midi.dump_midi(file_path)
-
+def decode_midi(id_list, file_path, tokenizer):
+    if tokenizer is None:
+        midi_processor.decode_midi(id_list, file_path)
+    else:
+        midi = tokenizer.tokens_to_midi(tokens=id_list)
+        midi.dump_midi(file_path)
 
 
 # main
@@ -59,6 +62,16 @@ def main():
     """
     args = parse_generate_args()
     print_generate_args(args)
+
+    if TOKENIZATION == "midi":
+        print("Chosen tokenization method: MIDI-like")
+        tokenizer = None
+    elif TOKENIZATION == "remi":
+        print("Chosen tokenization method: REMI+")
+        tokenizer = REMI(config)
+    else:
+        print("Chosen tokenization method: TSD")
+        tokenizer = TSD(config)
 
     if (args.force_cpu):
         use_cuda(False)
@@ -89,8 +102,7 @@ def main():
         with open(dataset.data_files[idx], "rb") as p:
             original = pickle.load(p)
         f_path = os.path.join(args.output_dir, f"original-{idx}.mid")
-        decode_REMIPlus_to_midi(original, f_path)
-        # decode_midi(original, f"{args.output_dir}/original-{idx}.mid")
+        decode_midi(original, f_path, tokenizer)
 
         model = MusicTransformer(n_layers=args.n_layers, num_heads=args.num_heads,
                                  d_model=args.d_model, dim_feedforward=args.dim_feedforward,
@@ -99,8 +111,7 @@ def main():
         model.load_state_dict(torch.load(args.model_weights))
 
         f_path = os.path.join(args.output_dir, f"primer-{idx}.mid")
-        decode_REMIPlus_to_midi(primer[:args.num_prime].tolist(), f_path)
-        # decode_midi(primer[:args.num_prime].tolist(), f_path)
+        decode_midi(primer[:args.num_prime].tolist(), f_path, tokenizer)
 
         for i in range(args.num_samples):
             print(f"Generating song {song}/{args.num_primer_files * args.num_samples}")
@@ -112,15 +123,13 @@ def main():
                     beam_seq, _ = model.generate(primer[:args.num_prime], args.target_seq_length, beam=args.beam)
 
                     f_path = os.path.join(args.output_dir, f"beam-{idx}-{i}.mid")
-                    decode_REMIPlus_to_midi(beam_seq[0].tolist(), f_path)
-                    # decode_midi(beam_seq[0].tolist(), f_path)
+                    decode_midi(beam_seq[0].tolist(), f_path, tokenizer)
                 else:
                     print("RAND DIST")
                     rand_seq, _ = model.generate(primer[:args.num_prime], args.target_seq_length, beam=0)
 
                     f_path = os.path.join(args.output_dir, f"rand-{idx}-{i}.mid")
-                    decode_REMIPlus_to_midi(rand_seq[0].tolist(), f_path)
-                    # decode_midi(rand_seq[0].tolist(), f_path)
+                    decode_midi(rand_seq[0].tolist(), f_path, tokenizer)
 
             song += 1
             print()
