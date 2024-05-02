@@ -208,9 +208,11 @@ def main():
     elif tokenization == "remi":
         print("Chosen tokenization method: REMI+")
         tokenizer = REMI(config)
-    else:
+    elif tokenization == "tsd":
         print("Chosen tokenization method: TSD")
         tokenizer = TSD(config)
+    else:
+        raise Exception("Not a valid tokenization method")
 
     print("Preprocessing midi files and saving to", output_dir)
     if args.custom_dataset:
