@@ -12,7 +12,8 @@ from dataset.e_piano import create_epiano_datasets, compute_epiano_accuracy
 from model.music_transformer import MusicTransformer
 from model.loss import SmoothCrossEntropyLoss
 
-from utilities.constants import *
+# from utilities.constants import *
+from utilities.constants_miditok import *
 from utilities.device import get_device, use_cuda
 from utilities.lr_scheduling import LrStepTracker, get_lr
 from utilities.argument_funcs import parse_train_args, print_train_args, write_model_params
@@ -23,11 +24,6 @@ CSV_HEADER = ["Epoch", "Learn rate", "Avg Train loss", "Train Accuracy", "Avg Ev
 # Baseline is an untrained epoch that we evaluate as a baseline loss and accuracy
 BASELINE_EPOCH = -1
 
-# Vocab size depends on the tokenization used on the MIDI files
-# REMI+
-VOCAB_SIZE = 530
-# TSD
-# VOCAB_SIZE = 497
 
 # main
 def main():

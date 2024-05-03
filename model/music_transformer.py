@@ -4,14 +4,13 @@ from torch.nn.modules.normalization import LayerNorm
 import random
 import numpy as np
 
-from utilities.constants import *
+# from utilities.constants import *
+from utilities.constants_miditok import *
 from utilities.device import get_device
 
 from .positional_encoding import PositionalEncoding
 from .rpr import TransformerEncoderRPR, TransformerEncoderLayerRPR
 
-# REMI
-VOCAB_SIZE = 530
 
 # MusicTransformer
 class MusicTransformer(nn.Module):

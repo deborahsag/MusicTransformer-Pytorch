@@ -7,7 +7,8 @@ from utilities.argument_funcs import parse_generate_args, print_generate_args
 from model.music_transformer import MusicTransformer
 from dataset.e_piano import create_epiano_datasets
 
-from utilities.constants import *
+# from utilities.constants import *
+from utilities.constants_miditok import *
 from utilities.device import get_device, use_cuda
 
 import third_party.midi_processor.processor as midi_processor
