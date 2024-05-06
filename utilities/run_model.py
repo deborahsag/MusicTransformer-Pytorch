@@ -1,7 +1,8 @@
 import torch
 import time
 
-from .constants import *
+# from .constants import *
+from .constants_miditok import *
 from utilities.device import get_device
 from .lr_scheduling import get_lr
 

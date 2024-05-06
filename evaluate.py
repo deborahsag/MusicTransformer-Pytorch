@@ -6,7 +6,8 @@ from dataset.e_piano import create_epiano_datasets, compute_epiano_accuracy
 
 from model.music_transformer import MusicTransformer
 
-from utilities.constants import *
+# from utilities.constants import *
+from utilities.constants_miditok import *
 from utilities.device import get_device, use_cuda
 from utilities.argument_funcs import parse_eval_args, print_eval_args
 from utilities.run_model import eval_model

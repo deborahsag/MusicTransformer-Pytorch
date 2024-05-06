@@ -18,9 +18,9 @@ TOKEN_END               = 2
 TOKEN_PAD               = 0
 
 # REMI
-# VOCAB_SIZE              = 530
+VOCAB_SIZE              = 530
 # TSD
-VOCAB_SIZE              = 497
+# VOCAB_SIZE              = 497
 
 TORCH_FLOAT             = torch.float32
 TORCH_INT               = torch.int32
