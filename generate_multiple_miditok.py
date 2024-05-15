@@ -16,8 +16,8 @@ from miditok import REMI, TSD, TokenizerConfig
 
 
 # TOKENIZATION = "midi"
-TOKENIZATION = "remi"
-# TOKENIZATION = "tsd"
+# TOKENIZATION = "remi"
+TOKENIZATION = "tsd"
 
 # Tokenizer parameters
 TOKENIZER_PARAMS = {
@@ -25,14 +25,15 @@ TOKENIZER_PARAMS = {
     "beat_res": {(0, 4): 8, (4, 12): 4},
     "num_velocities": 32,
     "special_tokens": ["PAD", "BOS", "EOS", "MASK"],
-    "use_chords": True,
-    "use_rests": False,
-    "use_tempos": True,
-    "use_time_signatures": True,
+    # "use_chords": True,
+    # "use_rests": False,
+    # "use_tempos": True,
+    # "use_time_signatures": True,
     "use_programs": True,
     "one_token_stream_for_programs": True,
-    "num_tempos": 32,  # number of tempo bins
-    "tempo_range": (40, 250),  # (min, max)
+    "program_changes": True
+    # "num_tempos": 32,  # number of tempo bins
+    # "tempo_range": (40, 250),  # (min, max)
 }
 config = TokenizerConfig(**TOKENIZER_PARAMS)
 
